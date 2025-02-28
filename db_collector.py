@@ -116,6 +116,7 @@ class DBCollector:
 
         # Прогресс-бар
         self.progress = ttk.Progressbar(btn_frame, mode='indeterminate')
+        self.progress.pack(fill="x")
 
         self.root.mainloop()
     # ^
@@ -227,7 +228,6 @@ class DBCollector:
     # Функционал. Реализация команды "Применить промпт"
     def apply_prompt(self):
         self.apply_button.config(state="disabled")
-        self.progress.pack(fill="x")
         self.progress.start()
         self.run_prompt()
 
@@ -263,7 +263,6 @@ class DBCollector:
 
     def prompt_monitor(self):
         self.progress.stop()
-        self.progress.destroy()
         self.apply_button.config(state="normal")
 
     def view_collect_data_window(self):
