@@ -1,18 +1,19 @@
 import os, os.path
 import re
 import tkinter as tk
+from functools import wraps
 from tkinter import filedialog, ttk
 from tkinter.messagebox import showwarning, showinfo, showerror
 import yaml
 import time
 from rag_processor import DBConstructor
 import threading
-import queue
+from queue import Queue
 import subprocess
 
 class DBCollector:
     def __init__(self):
-        self.output_queue = queue.Queue()
+        self.output_queue = Queue()
         self.audio_file = None
         self.output_dir = None
         self.output_queue = None
@@ -113,11 +114,13 @@ class DBCollector:
         self.close_button.pack(fill="x", pady=10)
         # close_button.grid(row=5, column=1, padx=10, pady=10)
 
+        # Прогресс-бар
+        self.progress = ttk.Progressbar(btn_frame, mode='indeterminate')
+
         self.root.mainloop()
     # ^
     # Главное окно приложения
     #===================================================================================================
-
     # Диалог открытия файла базы
 
     def select_text_file(self):
@@ -193,8 +196,75 @@ class DBCollector:
         self.file_save_button['state'] = "normal"
         self.file_saveas_button['state'] = "normal"
 
+    # Проверка на Markdown формат
+    def check_markdown(self):
+        self.content = self.text_area.get("1.0", "end")  # Считал контент
+        if re.search(r'^#+\s', self.content, re.MULTILINE):
+            pass # self.view_vector_window()
+        else:
+            showwarning("Предупреждение", "Файл не содержит Markdown разметки.")
 
+    # ===============================================================================
+    @staticmethod
+    def threaded(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            self.thread_result = Queue()  # Добавляем очередь в экземпляр класса
 
+            def thread_target():
+                try:
+                    result = func(self, *args, **kwargs)
+                    self.thread_result.put(('success', result))
+                except Exception as e:
+                    self.thread_result.put(('error', e))
+
+            thread = threading.Thread(target=thread_target, daemon=True)
+            thread.start()
+            return thread
+
+        return wrapper
+
+    # Функционал. Реализация команды "Применить промпт"
+    def apply_prompt(self):
+        self.apply_button.config(state="disabled")
+        self.progress.pack(fill="x", padx=10, pady=10)
+        self.progress.start()
+        self.run_prompt()
+
+    @threaded
+    def run_prompt(self):
+        db_maker = DBConstructor()
+        selected_prompt_key = self.drop_prompts.get()
+        system = self.prompts[selected_prompt_key]['system']
+        user = self.prompts[selected_prompt_key]['user']
+        self.content = self.text_area.get("1.0", tk.END)
+
+        code = None
+
+        match self.drop_prompts.current():
+            case 0:
+                print(f"Выбран промпт: {self.drop_prompts.get()}")
+                code, self.result_db = db_maker.db_pre_constructor(self.content, system, user, 60500)
+            case 1 | 2:
+                print(f"Выбран промпт: {self.drop_prompts.get()}")
+                code, self.result_db = db_maker.db_constructor(self.content, system, user)
+            case _:
+                showerror("Ошибка", "Этот промпт не для работы с базой знаний")
+                self.result_db = self.content
+
+        if code:
+            self.change_text_field(self.result_db)
+            showinfo("Успешно", f"Выполнен промпт \n\"{self.drop_prompts.get()}\"")
+        elif not code:
+            self.result_db = self.content
+            showerror("Ошибка запроса", self.result_db)
+        elif code is None: showerror("Ошибка", "Промпт не выполнен.")
+        self.prompt_monitor()
+
+    def prompt_monitor(self):
+        print("Монитор")
+        self.progress.stop()
+        self.progress.destroy()
 
     def view_collect_data_window(self):
         pass
