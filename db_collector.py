@@ -156,6 +156,7 @@ class DBCollector:
         )
         if file_path:
             print(f"Файл для сохранения: {file_path}")
+            self.root.title("Конструктор БЗ | " + self.file_name)
             return file_path
         return None  # Если пользователь отменил выбор
 
@@ -168,7 +169,6 @@ class DBCollector:
 
         if self.file_name == "Unnamed.txt" and os.path.exists(self.file_name) == False:
             self.save_as_file()
-            print(self.file_name)
         else:
             with open(self.file_name, 'w') as db_file:
                 db_file.write(self.content)
@@ -227,7 +227,7 @@ class DBCollector:
     # Функционал. Реализация команды "Применить промпт"
     def apply_prompt(self):
         self.apply_button.config(state="disabled")
-        self.progress.pack(fill="x", padx=10, pady=10)
+        self.progress.pack(fill="x")
         self.progress.start()
         self.run_prompt()
 
@@ -244,7 +244,7 @@ class DBCollector:
         match self.drop_prompts.current():
             case 0:
                 print(f"Выбран промпт: {self.drop_prompts.get()}")
-                code, self.result_db = db_maker.db_pre_constructor(self.content, system, user, 60500)
+                code, self.result_db = db_maker.db_pre_constructor(self.content, system, user, 60500, True)
             case 1 | 2:
                 print(f"Выбран промпт: {self.drop_prompts.get()}")
                 code, self.result_db = db_maker.db_constructor(self.content, system, user)
@@ -262,9 +262,9 @@ class DBCollector:
         self.prompt_monitor()
 
     def prompt_monitor(self):
-        print("Монитор")
         self.progress.stop()
         self.progress.destroy()
+        self.apply_button.config(state="normal")
 
     def view_collect_data_window(self):
         pass
