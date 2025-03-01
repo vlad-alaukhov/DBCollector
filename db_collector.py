@@ -6,6 +6,8 @@ from tkinter import filedialog, ttk
 from tkinter.messagebox import showwarning, showinfo, showerror
 import yaml
 import time
+
+from PIL.ImageOps import expand
 from rag_processor import DBConstructor
 import threading
 from queue import Queue
@@ -13,16 +15,15 @@ import subprocess
 
 class DBCollector:
     def __init__(self):
+        self.init_prompt = None
         self.output_queue = Queue()
         self.audio_file = None
         self.output_dir = None
         self.output_queue = None
         self.process = None
-        self.status_label = None
         self.start_btn = None
         self.data_area = None
         self.collect_data_window = None
-        self.worker_thread = None
         self.progress = None
         self.spinbox = None
         self.chunk_scale = None
@@ -42,10 +43,12 @@ class DBCollector:
         self.chunk_size = 0
         self.markdown_chunks = []
 
-        self.models = {
+        self.embs_models = {
             "openai": ["text-embedding-3-large", "text-embedding-ada-002"],
             "huggingface": ["intfloat/multilingual-e5-base", "intfloat/multilingual-e5-large"]
         }
+
+        self.transc_models = ["small", "base", "large_v3"]
 
         # Загружаем промпты из файла
         with open('prompts.yaml', 'r', encoding='utf-8') as file: self.prompts = yaml.safe_load(file)
@@ -209,19 +212,18 @@ class DBCollector:
     @staticmethod
     def threaded(func):
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
-            self.thread_result = Queue()  # Добавляем очередь в экземпляр класса
+        def wrapper(*args, **kwargs):
+            result_queue = Queue()
 
-            def thread_target():
+            def thread_worker():
                 try:
-                    result = func(self, *args, **kwargs)
-                    self.thread_result.put(('success', result))
+                    result = func(*args, **kwargs)
+                    result_queue.put(result)
                 except Exception as e:
-                    self.thread_result.put(('error', e))
+                    result_queue.put(f"ERROR: {str(e)}")
 
-            thread = threading.Thread(target=thread_target, daemon=True)
-            thread.start()
-            return thread
+            threading.Thread(target=thread_worker, daemon=True).start()
+            return result_queue
 
         return wrapper
 
@@ -272,9 +274,106 @@ class DBCollector:
         self.progress.pack_forget()
         self.apply_button.config(state="normal")
 
+# ===================================================================================================
+# Сбор базы знаний
+    # Окно интерфейса сбора базы знаний
+    # v
     def view_collect_data_window(self):
-        pass
+        self.collect_data_window = tk.Toplevel(self.root)
+        self.collect_data_window.title("Сбор базы знаний")
 
+        txt_frame = ttk.Labelframe(self.collect_data_window, text=" Транскрибация аудиофайла ")
+        txt_frame.pack(fill="both", padx=5, pady=5)
+
+        ttk.Label(txt_frame, text="Whisper:", width=len("Whisper:")).grid(row=0, column=0, padx=5, pady=5, sticky="nw")
+
+        transc_models_cmb = ttk.Combobox(txt_frame, values=self.transc_models)
+        transc_models_cmb.current(0)  # Устанавливаем первый элемент как выбранный
+        transc_models_cmb.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+
+        ttk.Label(txt_frame, text="Словарь:\n(Initial prompt)", width=len("(Initial prompt)")).grid(row=1, column=0, padx=5, pady=5)
+        self.init_prompt = tk.Text(txt_frame, wrap="word", width=20, height=5)
+        self.init_prompt.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
+
+        self.start_btn = tk.Button(txt_frame, text="Транскрибировать аудио...", command=self.start_transcription)
+        self.start_btn.grid(row=2, column=0, columnspan=2, padx=5, pady=5)
+
+        self.collect_data_window.transient(self.root)
+        self.collect_data_window.grab_set()
+    # ^
+    # Окно интерфейса сбора базы знаний
+
+    # Транскрибация
+    def start_transcription(self):
+        self.start_btn.config(state=tk.DISABLED)
+        # self.progress["value"] = 0
+        self.audio_file = filedialog.askopenfilename(title="Открыть файл")
+        self.output_dir = os.path.dirname(self.audio_file)
+
+    @threaded
+    def run_whisper_transcription(self):
+        print(self.audio_file)
+        print(self.output_dir)
+
+        try:
+            # Пример команды для Whisper (настройте под вашу версию)
+            cmd = [
+                "whisper",
+                self.audio_file,
+                "--model", "base",
+                "--output_dir", self.output_dir,
+                "--task", "transcribe",
+                "--language", "ru",
+                "--initial_prompt", self.init_prompt,
+                "--fp16", False,
+            ]
+
+            self.process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+                bufsize=1
+            )
+
+            # Чтение вывода в реальном времени
+            for line in self.process.stdout:
+                if "%" in line:
+                    self.output_queue.put(line)
+
+        except Exception as e:
+            self.output_queue.put(f"Error: {str(e)}")
+        finally:
+            self.output_queue.put(None)  # Сигнал завершения
+            self.process.stdout.close()
+
+    def monitor_progress(self):
+        try:
+            while True:
+                try:
+                    print(self.output_queue)
+                    line = self.output_queue.get_nowait()
+
+                except AttributeError:
+                    self.on_transcription_done()
+                    break
+
+                # Парсим прогресс из вывода Whisper
+                if "%" in line:
+                    percent = int(line.split("%")[0].split()[-1])
+                    self.progress["value"] = percent
+                    self.status_label.config(text=f"Progress: {percent}%")
+
+        except self.output_queue.Empty:
+            pass
+
+        finally:
+            if self.collect_data_window.winfo_exists():
+                self.collect_data_window.after(100, self.monitor_progress)
+
+    def on_transcription_done(self):
+        self.progress["value"] = 100
+        self.start_btn.config(state=tk.NORMAL)
+        self.status_label.config(text="Transcription completed!")
 
 DBCollector()
-
