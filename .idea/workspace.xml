@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Первичное восстановление">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db_collector.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_collector.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/prompts.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/prompts.yaml" afterDir="false" />
-    </list>
+    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -71,7 +67,39 @@
       <option name="project" value="LOCAL" />
       <updated>1740723813153</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал.">
+      <option name="closed" value="true" />
+      <created>1740760431991</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1740760431991</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал.">
+      <option name="closed" value="true" />
+      <created>1740760444013</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1740760444013</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал.">
+      <option name="closed" value="true" />
+      <created>1740762338674</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1740762338674</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал.">
+      <option name="closed" value="true" />
+      <created>1740776806796</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1740776806796</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -87,6 +115,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Первичное восстановление" />
-    <option name="LAST_COMMIT_MESSAGE" value="Первичное восстановление" />
+    <MESSAGE value="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал." />
+    <option name="LAST_COMMIT_MESSAGE" value="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал." />
   </component>
 </project>

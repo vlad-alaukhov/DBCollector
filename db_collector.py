@@ -116,7 +116,6 @@ class DBCollector:
 
         # Прогресс-бар
         self.progress = ttk.Progressbar(btn_frame, mode='indeterminate')
-        self.progress.pack(fill="x")
 
         self.root.mainloop()
     # ^
@@ -206,6 +205,7 @@ class DBCollector:
             showwarning("Предупреждение", "Файл не содержит Markdown разметки.")
 
     # ===============================================================================
+    # Декоратор для выполнения задачи в потоке
     @staticmethod
     def threaded(func):
         @wraps(func)
@@ -227,20 +227,25 @@ class DBCollector:
 
     # Функционал. Реализация команды "Применить промпт"
     def apply_prompt(self):
-        self.apply_button.config(state="disabled")
-        self.progress.start()
-        self.run_prompt()
+        self.apply_button.config(state="disabled") # Блокирую кнопки
+        self.progress.pack(fill="x")               # Размещаю прогресс-бар
+        self.progress.start()                      # Запускаю прогресс-бар
+        self.run_prompt()                          # Запускаю задачу "Применить промпт"
 
+    # Задача "Применить промпт работает через декоратор в отдельном потоке
     @threaded
     def run_prompt(self):
-        db_maker = DBConstructor()
+        db_maker = DBConstructor() # создаю экземпляр DBConstructor
+        # Беру промпт из комбобокса
         selected_prompt_key = self.drop_prompts.get()
         system = self.prompts[selected_prompt_key]['system']
         user = self.prompts[selected_prompt_key]['user']
+        # Загружаю контент для базы знаний из текстового поля
         self.content = self.text_area.get("1.0", tk.END)
 
         code = None
 
+        # Смотрю, какой промпт выбран, и запускаю обработку ChatGPT
         match self.drop_prompts.current():
             case 0:
                 print(f"Выбран промпт: {self.drop_prompts.get()}")
@@ -252,6 +257,7 @@ class DBCollector:
                 showerror("Ошибка", "Этот промпт не для работы с базой знаний")
                 self.result_db = self.content
 
+        # Обрабатываю результат и вывожу.
         if code:
             self.change_text_field(self.result_db)
             showinfo("Успешно", f"Выполнен промпт \n\"{self.drop_prompts.get()}\"")
@@ -259,10 +265,11 @@ class DBCollector:
             self.result_db = self.content
             showerror("Ошибка запроса", self.result_db)
         elif code is None: showerror("Ошибка", "Промпт не выполнен.")
-        self.prompt_monitor()
+        self.prompt_monitor() # Мониторинг процесса
 
     def prompt_monitor(self):
         self.progress.stop()
+        self.progress.pack_forget()
         self.apply_button.config(state="normal")
 
     def view_collect_data_window(self):
