@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал." />
+    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Восстановил интерфейс сбора данных. Есть транскрибация">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db_collector.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_collector.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -29,15 +32,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.db_collector.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "/home/home/Projects/DBCollector/.venv"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.db_collector.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/home/Projects/DBCollector/.venv&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/.venv" />
@@ -99,7 +102,23 @@
       <option name="project" value="LOCAL" />
       <updated>1740776806796</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал.">
+      <option name="closed" value="true" />
+      <created>1740848502730</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1740848502730</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Восстановил интерфейс сбора данных. Есть транскрибация">
+      <option name="closed" value="true" />
+      <created>1740858261929</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1740858261929</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -116,6 +135,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Первичное восстановление" />
     <MESSAGE value="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал." />
-    <option name="LAST_COMMIT_MESSAGE" value="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал." />
+    <MESSAGE value="Восстановил интерфейс сбора данных. Есть транскрибация" />
+    <option name="LAST_COMMIT_MESSAGE" value="Восстановил интерфейс сбора данных. Есть транскрибация" />
   </component>
 </project>

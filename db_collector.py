@@ -18,7 +18,6 @@ class DBCollector:
     def __init__(self):
         self.status_label = None
         self.init_prompt = None
-        self.output_queue = Queue()
         self.audio_file = None
         self.output_dir = None
         self.output_queue = None
@@ -312,6 +311,9 @@ class DBCollector:
     def start_transcription(self):
         self.start_btn.config(state=tk.DISABLED)
         self.audio_file = filedialog.askopenfilename(title="Открыть файл")
+        if not self.audio_file:
+            self.start_btn.config(state=tk.NORMAL)
+            return
         self.output_dir = os.path.dirname(self.audio_file)
         self.clear_text_field()
 
@@ -321,7 +323,7 @@ class DBCollector:
             mode='indeterminate',
             length=300
         )
-        self.progress.pack(fill="x", pady=5)
+        self.progress.pack(fill="x", pady=5, padx=5)
         self.progress.start()
 
         # Запускаем транскрибацию
@@ -389,16 +391,15 @@ class DBCollector:
                 # Завершение операции
                 self.on_transcription_done()
                 return
-
-            if line.startswith("ERROR"):
+            elif line.startswith("ERROR"):
                 self.progress.stop()
                 self.status_label.config(text=line)
                 self.start_btn.config(state=tk.NORMAL)
                 return
-
             # Если получили текст - выводим в поле
-            if not line.startswith("Progress:"):
+            else:
                 self.text_area.insert(tk.END, line + "\n")
+                self.text_area.see(tk.END)
 
         except queue.Empty:
             pass
