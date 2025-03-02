@@ -10,11 +10,13 @@ import time
 from PIL.ImageOps import expand
 from rag_processor import DBConstructor
 import threading
+import queue
 from queue import Queue
 import subprocess
 
 class DBCollector:
     def __init__(self):
+        self.status_label = None
         self.init_prompt = None
         self.output_queue = Queue()
         self.audio_file = None
@@ -191,13 +193,16 @@ class DBCollector:
 
     # Обновление текстового поля: имя файла становится Unnamed, текстовое поле очищается,
     # заполняется текстом из аргумента text, заголовок меняется и ставится признае несохраненного файла.
-    def change_text_field(self, text: str | list):
+    def clear_text_field(self):
         self.file_name = 'Unnamed.txt'
         self.text_area.delete("1.0", tk.END)
-        self.text_area.insert(tk.END, text)
         self.root.title("Конструктор БЗ | " + self.file_name + "*")
         self.file_save_button['state'] = "normal"
         self.file_saveas_button['state'] = "normal"
+
+    def change_text_field(self, text: str | list):
+        self.clear_text_field()
+        self.text_area.insert(tk.END, text)
 
     # Проверка на Markdown формат
     def check_markdown(self):
@@ -306,17 +311,30 @@ class DBCollector:
     # Транскрибация
     def start_transcription(self):
         self.start_btn.config(state=tk.DISABLED)
-        # self.progress["value"] = 0
         self.audio_file = filedialog.askopenfilename(title="Открыть файл")
         self.output_dir = os.path.dirname(self.audio_file)
+        self.clear_text_field()
+
+        # Создаем прогресс-бар
+        self.progress = ttk.Progressbar(
+            self.collect_data_window,
+            mode='indeterminate',
+            length=300
+        )
+        self.progress.pack(fill="x", pady=5)
+        self.progress.start()
+
+        # Запускаем транскрибацию
+        self.output_queue = Queue()
+        self.run_whisper_transcription()
+        self.monitor_transcription()
 
     @threaded
     def run_whisper_transcription(self):
-        print(self.audio_file)
-        print(self.output_dir)
-
         try:
-            # Пример команды для Whisper (настройте под вашу версию)
+            # Получаем текст из initial prompt
+            initial_prompt = self.init_prompt.get("1.0", tk.END).strip()
+
             cmd = [
                 "whisper",
                 self.audio_file,
@@ -324,8 +342,9 @@ class DBCollector:
                 "--output_dir", self.output_dir,
                 "--task", "transcribe",
                 "--language", "ru",
-                "--initial_prompt", self.init_prompt,
-                "--fp16", False,
+                "--verbose", "True",
+                "--initial_prompt", initial_prompt,
+                "--fp16", "False"
             ]
 
             self.process = subprocess.Popen(
@@ -336,44 +355,66 @@ class DBCollector:
                 bufsize=1
             )
 
-            # Чтение вывода в реальном времени
+            # Чтение вывода процесса
             for line in self.process.stdout:
-                if "%" in line:
-                    self.output_queue.put(line)
+                self.output_queue.put(line)
+
+            # После завершения получаем результат
+            self.process.wait()
+
+            if self.process.returncode == 0:
+                # Ищем созданный файл
+                base_name = os.path.splitext(os.path.basename(self.audio_file))[0]
+                output_file = os.path.join(self.output_dir, f"{base_name}.txt")
+
+                if os.path.exists(output_file):
+                    with open(output_file, 'r', encoding='utf-8') as f:
+                        self.output_queue.put(f.read())
+                else:
+                    self.output_queue.put("ERROR: Выходной файл не найден")
+
+            self.output_queue.put(None)
 
         except Exception as e:
-            self.output_queue.put(f"Error: {str(e)}")
+            self.output_queue.put(f"ERROR: {str(e)}")
         finally:
-            self.output_queue.put(None)  # Сигнал завершения
-            self.process.stdout.close()
+            if hasattr(self, 'process') and self.process:
+                self.process.stdout.close()
 
-    def monitor_progress(self):
+    def monitor_transcription(self):
         try:
-            while True:
-                try:
-                    print(self.output_queue)
-                    line = self.output_queue.get_nowait()
+            line = self.output_queue.get_nowait()
 
-                except AttributeError:
-                    self.on_transcription_done()
-                    break
+            if line is None:
+                # Завершение операции
+                self.on_transcription_done()
+                return
 
-                # Парсим прогресс из вывода Whisper
-                if "%" in line:
-                    percent = int(line.split("%")[0].split()[-1])
-                    self.progress["value"] = percent
-                    self.status_label.config(text=f"Progress: {percent}%")
+            if line.startswith("ERROR"):
+                self.progress.stop()
+                self.status_label.config(text=line)
+                self.start_btn.config(state=tk.NORMAL)
+                return
 
-        except self.output_queue.Empty:
+            # Если получили текст - выводим в поле
+            if not line.startswith("Progress:"):
+                self.text_area.insert(tk.END, line + "\n")
+
+        except queue.Empty:
             pass
 
-        finally:
-            if self.collect_data_window.winfo_exists():
-                self.collect_data_window.after(100, self.monitor_progress)
+        self.collect_data_window.after(100, self.monitor_transcription)
 
     def on_transcription_done(self):
-        self.progress["value"] = 100
+        self.progress.stop()
+        self.progress.pack_forget()
         self.start_btn.config(state=tk.NORMAL)
-        self.status_label.config(text="Transcription completed!")
+
+        # Проверяем результат
+        result = self.text_area.get("1.0", tk.END).strip()
+        if result and not result.startswith("ERROR"):
+            showinfo("Готово", "Транскрибация успешно завершена")
+        else:
+            showerror("Ошибка", "Не удалось получить результат транскрибации")
 
 DBCollector()
