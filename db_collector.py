@@ -50,7 +50,7 @@ class DBCollector:
             "huggingface": ["intfloat/multilingual-e5-base", "intfloat/multilingual-e5-large"]
         }
 
-        self.transc_models = ["small", "base", "large_v3"]
+        self.transc_models = ["small", "medium", "base", "large_v3"]
 
         # Загружаем промпты из файла
         with open('prompts.yaml', 'r', encoding='utf-8') as file: self.prompts = yaml.safe_load(file)
@@ -203,14 +203,6 @@ class DBCollector:
     def change_text_field(self, text: str | list):
         self.clear_text_field()
         self.text_area.insert(tk.END, text)
-
-    # Проверка на Markdown формат
-    def check_markdown(self):
-        self.content = self.text_area.get("1.0", "end")  # Считал контент
-        if re.search(r'^#+\s', self.content, re.MULTILINE):
-            pass # self.view_vector_window()
-        else:
-            showwarning("Предупреждение", "Файл не содержит Markdown разметки.")
 
     # ===============================================================================
     # Декоратор для выполнения задачи в потоке
@@ -454,6 +446,135 @@ class DBCollector:
         self.progress.pack_forget()
         self.pdf_btn.config(state="normal")
 
+#===================================================================================================
+    # Окно интерфейса векторизации
+    # v
+    def view_vector_window(self):
+        self.db_maker = DBConstructor()
 
+        # Побил на чанки markdown разметкой
+        self.markdown_chunks = self.db_maker.split_markdown(self.content)
+        # Готовлю к дроблению markdown чанков
+        pc_lens = [len(md.page_content) for md in self.markdown_chunks] # Узнал длины всех чанков, чтобы взять максимум
+        max_chunk = max(pc_lens)
+        min_chunk = min(pc_lens)
+
+        # Создаем дочернее окно
+        self.vector_window = tk.Toplevel(self.root)
+        self.vector_window.title("Векторизация")
+
+        def set_model_name(selected_type):
+            self.model_name['values'] = self.embs_models[selected_type]
+            self.model_name.current(0)  # Устанавливаем первую модель как выбранную
+
+        def update_models(event):
+            selected_type = self.model_type.get()
+            set_model_name(selected_type)
+
+        model_frame = ttk.LabelFrame(self.vector_window, text="Модель для эмбеддингов")
+        model_frame.pack(fill="x", padx=5, pady=5)
+
+        chunk_frame = ttk.LabelFrame(self.vector_window, text="Размер чанка, симв.")
+        chunk_frame.pack(fill="x", padx=5, pady=5)
+
+        # Выпадающий список для выбора провайдера моделей
+        self.model_type = ttk.Combobox(model_frame, values=list(self.embs_models.keys()))
+        self.model_type.pack(fill='x', padx=10, pady=10)
+
+        # Комбобокс для выбора конкретной модели
+        self.model_name = ttk.Combobox(model_frame)
+        self.model_name.pack(fill='x', padx=10, pady=10)
+
+        self.model_type.current(0)
+        set_model_name(self.model_type.get())
+        # Привязываем обновление моделей к выбору типа модели
+        self.model_type.bind("<<ComboboxSelected>>", update_models)
+
+        # Кнопка Векторизовать
+        self.start_vect_button = tk.Button(self.vector_window, text="Векторизовать", command=self.start_vectorization)
+        self.start_vect_button.pack(fill="x", padx=10, pady=10)
+
+        def set_value(value):
+            if value.isnumeric():
+                self.current_size.get()
+
+        self.current_size = tk.IntVar(value=max_chunk)
+
+        # Spinbox для ручного ввода значения
+        self.spinbox = ttk.Spinbox(chunk_frame, from_=min_chunk, to=max_chunk,
+                                   textvariable=self.current_size, increment=1)
+        self.spinbox.pack(anchor="e", padx=10)
+
+        def update_scale(value):
+            self.current_size.set(round(float(value)))
+
+        # Scale для изменения значения через ползунок
+        self.chunk_scale = ttk.Scale(chunk_frame, orient="horizontal", from_=min_chunk, to=max_chunk,
+                                     variable=self.current_size, command=update_scale)
+        self.chunk_scale.pack(fill="x", padx=10, pady=10)
+
+        # Привязка изменения переменной к функции
+        self.current_size.trace_add("write", lambda *args: set_value(self.spinbox.get()))
+
+        self.vector_window.transient(self.root)
+        self.vector_window.grab_set()
+    # ^
+    # Окно интерфейса векторизации
+    # ===================================================================================================
+
+    # Функционал. Реализация векторизации
+    # Проверка на Markdown формат
+    def check_markdown(self):
+        self.content = self.text_area.get("1.0", "end")  # Считал контент
+        if re.search(r'^#+\s', self.content, re.MULTILINE):
+            self.view_vector_window() # Запустил окно векторизации
+        else:
+            showwarning("Предупреждение", "Файл не содержит Markdown разметки.")
+
+    # Метод для запуска векторизации в отдельном потоке. Срабатывает по кнопке "Векторизовать" из диалога векторизации
+    def start_vectorization(self):
+        # Готовлю папку по умолчанию для записи эмбеддингов
+        curdir ='/'.join(self.file_name.split("/")[0:-1])
+        init_dir = f"{curdir}/DB_{self.file_name.split('/')[-1].split('.')[0]}_{self.model_name.get().split('/')[-1]}"
+        if not os.path.exists(init_dir): os.makedirs(init_dir)
+
+        self.db_folder = filedialog.askdirectory(initialdir=init_dir, mustexist=False)
+        if self.db_folder:
+            # Настройка UI
+            self.start_vect_button.config(state=tk.DISABLED)
+            self.progress = ttk.Progressbar(
+                self.vector_window,
+                mode='indeterminate'
+            )
+            self.progress.pack(fill="x", pady=5)
+            self.progress.start()
+
+            # Запуск векторизации
+            self.vect_queue = Queue()
+            self.vectorise()
+            self.monitor_vectorization()
+
+    # Собственно векторизация
+    @threaded
+    def vectorise(self):
+        code = None
+        result = None
+        model_index = self.model_type.current()
+        model_name = self.model_name.get()
+        chunk_size = self.current_size.get()
+        langchain_docs = self.db_maker.split_recursive_from_markdown(self.markdown_chunks, chunk_size)
+
+        match model_index:
+            case 0:
+                print(model_index, model_name)
+                code, result = self.db_maker.vectorizator_openai(langchain_docs, self.db_folder, model_name)
+            case 1:
+                print(model_index, model_name)
+                code, result = self.db_maker.vectorizator_sota(langchain_docs, self.db_folder, model_name)
+        match code:
+            case True:
+                showinfo(title="Инфо", message=result)
+            case False:
+                showerror(title="Ошибка", message=result)
 
 DBCollector()
