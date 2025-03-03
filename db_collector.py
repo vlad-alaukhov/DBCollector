@@ -16,6 +16,7 @@ import subprocess
 
 class DBCollector:
     def __init__(self):
+        self.pdf_btn = None
         self.status_label = None
         self.init_prompt = None
         self.audio_file = None
@@ -286,21 +287,33 @@ class DBCollector:
         self.collect_data_window = tk.Toplevel(self.root)
         self.collect_data_window.title("Сбор базы знаний")
 
-        txt_frame = ttk.Labelframe(self.collect_data_window, text=" Транскрибация аудиофайла ")
-        txt_frame.pack(fill="both", padx=5, pady=5)
+        """Транскрибация аудиофайла"""
 
-        ttk.Label(txt_frame, text="Whisper:", width=len("Whisper:")).grid(row=0, column=0, padx=5, pady=5, sticky="nw")
+        aud_frame = ttk.Labelframe(self.collect_data_window, text=" Транскрибация аудиофайла ")
+        aud_frame.pack(fill="both", padx=5, pady=5)
 
-        transc_models_cmb = ttk.Combobox(txt_frame, values=self.transc_models)
+        ttk.Label(aud_frame, text="Whisper:", width=len("Whisper:")).grid(row=0, column=0, padx=5, pady=5, sticky="nw")
+
+        transc_models_cmb = ttk.Combobox(aud_frame, values=self.transc_models)
         transc_models_cmb.current(0)  # Устанавливаем первый элемент как выбранный
         transc_models_cmb.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
 
-        ttk.Label(txt_frame, text="Словарь:\n(Initial prompt)", width=len("(Initial prompt)")).grid(row=1, column=0, padx=5, pady=5)
-        self.init_prompt = tk.Text(txt_frame, wrap="word", width=20, height=5)
+        ttk.Label(aud_frame, text="Словарь:\n(Initial prompt)", width=len("(Initial prompt)")).grid(row=1, column=0, padx=5, pady=5)
+        self.init_prompt = tk.Text(aud_frame, wrap="word", width=20, height=5)
         self.init_prompt.grid(row=1, column=1, padx=5, pady=5, sticky="nsew")
 
-        self.start_btn = tk.Button(txt_frame, text="Транскрибировать аудио...", command=self.start_transcription)
+        self.start_btn = tk.Button(aud_frame, text="Транскрибировать аудио...", command=self.start_transcription)
         self.start_btn.grid(row=2, column=0, columnspan=2, padx=5, pady=5)
+
+        """Парсинг PDF страниц"""
+
+        pdf_frame = ttk.Labelframe(self.collect_data_window, text=" PDF файлы ")
+        pdf_frame.pack(fill="both", padx=5, pady=5)
+
+        ttk.Label(pdf_frame, text="PDF документ:", width=len("PDF документ:")).grid(row=0, column=0, padx=5, pady=5, sticky="nw")
+        self.pdf_btn = tk.Button(pdf_frame, text="Извлечь...", command=self.start_pdf)
+        self.pdf_btn.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+
 
         self.collect_data_window.transient(self.root)
         self.collect_data_window.grab_set()
@@ -320,8 +333,7 @@ class DBCollector:
         # Создаем прогресс-бар
         self.progress = ttk.Progressbar(
             self.collect_data_window,
-            mode='indeterminate',
-            length=300
+            mode='indeterminate'
         )
         self.progress.pack(fill="x", pady=5, padx=5)
         self.progress.start()
@@ -417,5 +429,31 @@ class DBCollector:
             showinfo("Готово", "Транскрибация успешно завершена")
         else:
             showerror("Ошибка", "Не удалось получить результат транскрибации")
+
+    # PDF парсинг
+    def start_pdf(self):
+        # Создаем прогресс-бар
+        self.pdf_btn.config(state="disabled")
+        self.selected_files = list(filedialog.askopenfilenames(defaultextension="pdf", title="Открыть pdf"))
+        if self.selected_files:
+            self.run_pdf()
+            self.progress = ttk.Progressbar(self.collect_data_window, mode='indeterminate')
+            self.progress.start()
+            self.progress.pack(fill="x", pady=5, padx=5)
+
+    @threaded
+    def run_pdf(self):
+        db_maker = DBConstructor()
+        code, pdf_text = db_maker.pdf_parser(self.selected_files)
+        if code: self.change_text_field(pdf_text)
+        else: showerror("Ошибка", pdf_text)
+        self.monitor_pdf()
+
+    def monitor_pdf(self):
+        self.progress.stop()
+        self.progress.pack_forget()
+        self.pdf_btn.config(state="normal")
+
+
 
 DBCollector()

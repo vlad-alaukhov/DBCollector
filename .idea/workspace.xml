@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Восстановил интерфейс сбора данных. Есть транскрибация">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db_collector.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_collector.py" afterDir="false" />
-    </list>
+    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Восстановил интерфейс сбора данных. Есть транскрибация" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -118,7 +115,23 @@
       <option name="project" value="LOCAL" />
       <updated>1740858261929</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Восстановил интерфейс сбора данных. Есть транскрибация">
+      <option name="closed" value="true" />
+      <created>1740941671693</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1740941671693</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Восстановил интерфейс сбора данных. Есть транскрибация">
+      <option name="closed" value="true" />
+      <created>1740947945430</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1740947945430</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
