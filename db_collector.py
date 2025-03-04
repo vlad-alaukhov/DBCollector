@@ -550,7 +550,7 @@ class DBCollector:
             self.progress.start()
 
             # Запуск векторизации
-            self.vect_queue = Queue()
+            self.output_queue = Queue()
             self.vectorise()
             self.monitor_vectorization()
 
@@ -571,10 +571,10 @@ class DBCollector:
             case 1:
                 print(model_index, model_name)
                 code, result = self.db_maker.vectorizator_sota(langchain_docs, self.db_folder, model_name)
-        match code:
-            case True:
-                showinfo(title="Инфо", message=result)
-            case False:
-                showerror(title="Ошибка", message=result)
+        if code: showinfo(title="Инфо", message=result)
+        else: showerror(title="Ошибка", message=result)
+
+    def monitor_vectorization(self):
+        pass
 
 DBCollector()
