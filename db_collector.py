@@ -248,7 +248,7 @@ class DBCollector:
         match self.drop_prompts.current():
             case 0:
                 print(f"Выбран промпт: {self.drop_prompts.get()}")
-                code, self.result_db = db_maker.db_pre_constructor(self.content, system, user, 60500, True)
+                code, self.result_db = db_maker.db_pre_constructor(self.content, system, user, 60500)
             case 1 | 2:
                 print(f"Выбран промпт: {self.drop_prompts.get()}")
                 code, self.result_db = db_maker.db_constructor(self.content, system, user)
