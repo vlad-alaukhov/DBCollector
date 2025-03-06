@@ -561,7 +561,7 @@ class DBCollector:
 
             # Запуск векторизации
             self.output_queue = Queue()
-            self.vectorise()
+            self.output_queue = self.vectorise()
             self.monitor_vectorization()
 
     # Собственно векторизация
