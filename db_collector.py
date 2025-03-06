@@ -229,7 +229,9 @@ class DBCollector:
         self.apply_button.config(state="disabled") # Блокирую кнопки
         self.progress.pack(fill="x")               # Размещаю прогресс-бар
         self.progress.start()                      # Запускаю прогресс-бар
-        self.run_prompt()                          # Запускаю задачу "Применить промпт"
+        self.output_queue = Queue()
+        self.output_queue = self.run_prompt()                          # Запускаю задачу "Применить промпт"
+        self.prompt_monitor() # Мониторинг процесса
 
     # Задача "Применить промпт работает через декоратор в отдельном потоке
     @threaded
@@ -264,12 +266,20 @@ class DBCollector:
             self.result_db = self.content
             showerror("Ошибка запроса", self.result_db)
         elif code is None: showerror("Ошибка", "Промпт не выполнен.")
-        self.prompt_monitor() # Мониторинг процесса
+        return "Выполнено"
 
     def prompt_monitor(self):
-        self.progress.stop()
-        self.progress.pack_forget()
-        self.apply_button.config(state="normal")
+        try:
+            output = self.output_queue.get_nowait()
+            if output:
+                self.progress.stop()
+                self.progress.pack_forget()
+                self.apply_button.config(state="normal")
+        except queue.Empty:
+            pass
+
+        self.root.after(100, self.prompt_monitor)
+
 
 # ===================================================================================================
 # Сбор базы знаний
@@ -573,8 +583,19 @@ class DBCollector:
                 code, result = self.db_maker.vectorizator_sota(langchain_docs, self.db_folder, model_name)
         if code: showinfo(title="Инфо", message=result)
         else: showerror(title="Ошибка", message=result)
+        return result
 
     def monitor_vectorization(self):
-        pass
+        try:
+            output = self.output_queue.get_nowait()
+            if output:
+                self.progress.stop()
+                self.progress.pack_forget()
+                self.start_vect_button.config(state=tk.NORMAL)
+        except queue.Empty:
+            pass
+
+        self.collect_data_window.after(100, self.monitor_transcription)
+
 
 DBCollector()
