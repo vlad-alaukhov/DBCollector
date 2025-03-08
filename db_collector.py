@@ -155,7 +155,7 @@ class DBCollector:
             parent=self.root,
             confirmoverwrite=overwrite,
             title="Сохранить файл",
-            defaultextension=".txt",  # Укажите расширение по умолчанию
+            defaultextension=".*",  # Укажите расширение по умолчанию
             filetypes=[("Text files", "*.txt"), ("Markdown files", "*.md"), ("All files", "*.*")],
             initialfile=self.file_name
         )
@@ -163,7 +163,7 @@ class DBCollector:
             print(f"Файл для сохранения: {file_path}")
             self.root.title("Конструктор БЗ | " + self.file_name)
             return file_path
-        return None  # Если пользователь отменил выбор
+        else: return None  # Если пользователь отменил выбор
 
         # Метод для сохранения файла базы. Используется как кнопка "Сохранить".
         # Если текст появился в чистом окне, то ему присваивается имя Unnamed и вызывается диалог "Сохранить как..."
