@@ -544,11 +544,11 @@ class DBCollector:
     # Метод для запуска векторизации в отдельном потоке. Срабатывает по кнопке "Векторизовать" из диалога векторизации
     def start_vectorization(self):
         # Готовлю папку по умолчанию для записи эмбеддингов
-        curdir ='/'.join(self.file_name.split("/")[0:-1])
-        init_dir = f"{curdir}/DB_{self.file_name.split('/')[-1].split('.')[0]}_{self.model_name.get().split('/')[-1]}"
+        curdir = os.getcwd()
+        init_dir = f"{curdir}/FAISS/DB_{self.file_name.split('/')[-1].split('.')[0]}_{self.model_name.get().split('/')[-1]}"
         if not os.path.exists(init_dir): os.makedirs(init_dir)
-
         self.db_folder = filedialog.askdirectory(initialdir=init_dir, mustexist=False)
+
         if self.db_folder:
             # Настройка UI
             self.start_vect_button.config(state=tk.DISABLED)
@@ -563,6 +563,7 @@ class DBCollector:
             self.output_queue = Queue()
             self.output_queue = self.vectorise()
             self.monitor_vectorization()
+        else: os.rmdir(init_dir)
 
     # Собственно векторизация
     @threaded
@@ -595,7 +596,7 @@ class DBCollector:
         except queue.Empty:
             pass
 
-        self.collect_data_window.after(100, self.monitor_transcription)
+        self.vector_window.after(100, self.monitor_vectorization)
 
 
 DBCollector()
