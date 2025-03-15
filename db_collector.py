@@ -16,6 +16,7 @@ import subprocess
 
 class DBCollector:
     def __init__(self):
+        self.merge_db_window = None
         self.pdf_btn = None
         self.status_label = None
         self.init_prompt = None
@@ -570,18 +571,22 @@ class DBCollector:
     def vectorise(self):
         code = None
         result = None
+        model_type = self.model_type.get()
         model_index = self.model_type.current()
         model_name = self.model_name.get()
         chunk_size = self.current_size.get()
         langchain_docs = self.db_maker.split_recursive_from_markdown(self.markdown_chunks, chunk_size)
+        print(model_index, model_name)
 
-        match model_index:
+        code, result = self.db_maker.vectorizator(langchain_docs, self.db_folder, model_type=model_type, model_name=model_name)
+        """match model_index:
             case 0:
                 print(model_index, model_name)
-                code, result = self.db_maker.vectorizator_openai(langchain_docs, self.db_folder, model_name)
+                
+                # code, result = self.db_maker.vectorizator_openai(langchain_docs, self.db_folder, model_name)
             case 1:
                 print(model_index, model_name)
-                code, result = self.db_maker.vectorizator_sota(langchain_docs, self.db_folder, model_name)
+                code, result = self.db_maker.vectorizator_sota(langchain_docs, self.db_folder, model_name)"""
         if code: showinfo(title="Инфо", message=result)
         else: showerror(title="Ошибка", message=result)
         return result
