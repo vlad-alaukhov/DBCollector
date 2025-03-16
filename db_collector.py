@@ -16,6 +16,8 @@ import subprocess
 
 class DBCollector:
     def __init__(self):
+        self.db_listbox = None
+        self.selected_db_folders = None
         self.merge_db_window = None
         self.pdf_btn = None
         self.status_label = None
@@ -114,6 +116,10 @@ class DBCollector:
         self.vect_button = tk.Button(btn_frame, text="Векторизовать...", command=self.check_markdown, state='disabled')
         self.vect_button.pack(fill="x", pady=10)
         # close_button.grid(row=4, column=1, padx=10, pady=10)
+
+        # Кнопка Объединить базы
+        self.merge_button = tk.Button(btn_frame, text="Объединить базы знаний...", command=self.merge_db)
+        self.merge_button.pack(fill="x", pady=10)
 
         # Кнопка Закрыть
         self.close_button = tk.Button(btn_frame, text="Закрыть", command=self.root.destroy)
@@ -579,14 +585,7 @@ class DBCollector:
         print(model_index, model_name)
 
         code, result = self.db_maker.vectorizator(langchain_docs, self.db_folder, model_type=model_type, model_name=model_name)
-        """match model_index:
-            case 0:
-                print(model_index, model_name)
-                
-                # code, result = self.db_maker.vectorizator_openai(langchain_docs, self.db_folder, model_name)
-            case 1:
-                print(model_index, model_name)
-                code, result = self.db_maker.vectorizator_sota(langchain_docs, self.db_folder, model_name)"""
+
         if code: showinfo(title="Инфо", message=result)
         else: showerror(title="Ошибка", message=result)
         return result
@@ -603,5 +602,130 @@ class DBCollector:
 
         self.vector_window.after(100, self.monitor_vectorization)
 
+# ==============================================================================================================
+# Объединение баз знаний
+# Окно объединения баз знаний
+    def merge_db(self):
+        """Окно объединения баз знаний"""
+        self.merge_db_window = tk.Toplevel(self.root)
+        self.merge_db_window.title("Объединение баз знаний")
+
+        # Фрейм со списком выбранных папок
+        list_frame = ttk.Frame(self.merge_db_window)
+        list_frame.pack(fill='both', expand=True, padx=5, pady=5)
+
+        # Листбокс и скроллбар
+        self.db_listbox = tk.Listbox(list_frame, selectmode=tk.SINGLE, width=60, height=8)
+        scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=self.db_listbox.yview)
+        self.db_listbox.configure(yscrollcommand=scrollbar.set)
+
+        self.db_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Фрейм с кнопками управления
+        btn_frame = ttk.Frame(self.merge_db_window)
+        btn_frame.pack(fill=tk.X, padx=5, pady=5)
+
+        add_btn = ttk.Button(btn_frame, text="Добавить базу", command=self.add_db_folder)
+        remove_btn = ttk.Button(btn_frame, text="Удалить", command=self.remove_db_folder)
+        merge_btn = ttk.Button(btn_frame, text="Объединить", command=self.start_merge)
+        cancel_btn = ttk.Button(btn_frame, text="Отмена", command=self.merge_db_window.destroy)
+
+        add_btn.pack(side=tk.LEFT, padx=2)
+        remove_btn.pack(side=tk.LEFT, padx=2)
+        merge_btn.pack(side=tk.RIGHT, padx=2)
+        cancel_btn.pack(side=tk.RIGHT, padx=2)
+
+        # Статусная строка
+        self.merge_status = ttk.Label(self.merge_db_window, text="Выбрано баз: 0")
+        self.merge_status.pack(fill=tk.X, padx=5, pady=2)
+
+    def add_db_folder(self):
+        """Добавление папки с базой в список"""
+        folder = filedialog.askdirectory(
+            title="Выберите папку с базой FAISS",
+            mustexist=True
+        )
+        if folder and self.validate_db_folder(folder):
+            if folder not in self.db_listbox.get(0, tk.END):
+                self.db_listbox.insert(tk.END, folder)
+                self.update_merge_status()
+            else:
+                showwarning("Предупреждение", "Эта база уже добавлена!")
+        elif folder:
+            showerror("Ошибка", "Выбранная папка не содержит валидную базу FAISS")
+
+    @staticmethod
+    def validate_db_folder(path):
+        """Проверка структуры папки с базой"""
+        required = {'metadata.json', 'index.faiss', 'index.pkl'}
+        files = set(os.listdir(path))
+        return required.issubset(files)
+
+    def remove_db_folder(self):
+        """Удаление выбранной базы из списка"""
+        selection = self.db_listbox.curselection()
+        if selection:
+            self.db_listbox.delete(selection[0])
+            self.update_merge_status()
+
+    def update_merge_status(self):
+        """Обновление статусной информации"""
+        count = self.db_listbox.size()
+        self.merge_status.config(text=f"Выбрано баз: {count}")
+
+    def start_merge(self):
+        """Запуск процесса объединения баз"""
+        folders = list(self.db_listbox.get(0, tk.END))
+        if len(folders) < 2:
+            showwarning("Предупреждение", "Выберите минимум 2 базы для объединения")
+            return
+
+        # Выбор папки для сохранения
+        output_folder = filedialog.askdirectory(
+            title="Выберите папку для сохранения объединенной базы",
+            mustexist=False
+        )
+        if not output_folder:
+            return
+
+        # Создаем прогресс-бар
+        self.progress = ttk.Progressbar(
+            self.merge_db_window,
+            mode='indeterminate'
+        )
+        self.progress.pack(fill=tk.X, padx=5, pady=5)
+        self.progress.start()
+
+        # Запускаем в отдельном потоке
+        self.output_queue = Queue()
+        self.output_queue = self.run_merge_process(folders, output_folder)
+        self.monitor_merge_process()
+
+    @threaded
+    def run_merge_process(self, folders, output_folder):
+        """Запуск объединения в фоновом режиме"""
+        try:
+            constructor = DBConstructor()
+            success, message = constructor.merge_databases(folders, output_folder)
+            return success, message
+        except Exception as e:
+            return False, f"Ошибка объединения: {str(e)}"
+
+    def monitor_merge_process(self):
+        """Мониторинг выполнения операции"""
+        try:
+            result = self.output_queue.get_nowait()
+            self.progress.stop()
+            self.progress.pack_forget()
+
+            if result[0]:
+                showinfo("Успешно", result[1])
+                self.merge_db_window.destroy()
+            else:
+                showerror("Ошибка", result[1])
+
+        except queue.Empty:
+            self.root.after(100, self.monitor_merge_process)
 
 DBCollector()

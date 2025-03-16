@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Восстановил интерфейс сбора данных. Есть транскрибация" />
+    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Поменял векторизацию на универсальную с использованием метаданных и определением модели">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,6 +22,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;vlad-alaukhov&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/vlad-alaukhov/DBCollector.git&quot;,
+    &quot;accountId&quot;: &quot;8127a0b6-e846-4bb2-92d0-68465bff558d&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -29,24 +43,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.db_collector.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/home/Projects/DBCollector/.venv&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.db_collector.executor": "Run",
+    "Python.mf.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "/home/home/Projects/DBCollector"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/.venv" />
     </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-1b1018131e27-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.22562.180" />
+        <option value="bundled-python-sdk-14705d77f0bb-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.25659.43" />
       </set>
     </attachedChunks>
   </component>
@@ -131,7 +147,79 @@
       <option name="project" value="LOCAL" />
       <updated>1740947945430</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="Восстановил pdf парсинг">
+      <option name="closed" value="true" />
+      <created>1740997442756</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1740997442756</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Восстановил pdf парсинг">
+      <option name="closed" value="true" />
+      <created>1741003299474</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1741003299474</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Восстановил pdf парсинг">
+      <option name="closed" value="true" />
+      <created>1741111267593</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1741111267593</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Восстановил pdf парсинг">
+      <option name="closed" value="true" />
+      <created>1741203365083</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1741203365083</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Восстановил pdf парсинг">
+      <option name="closed" value="true" />
+      <created>1741258496909</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1741258496909</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Доработал prompt_monitor, дописал monitor_vectorization">
+      <option name="closed" value="true" />
+      <created>1741258626905</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1741258626905</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Доработал prompt_monitor, дописал monitor_vectorization">
+      <option name="closed" value="true" />
+      <created>1741423259741</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1741423259741</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Доработал prompt_monitor, дописал monitor_vectorization">
+      <option name="closed" value="true" />
+      <created>1741428153711</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1741428153711</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Поменял векторизацию на универсальную с использованием метаданных и определением модели">
+      <option name="closed" value="true" />
+      <created>1742068200927</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1742068200927</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -149,6 +237,9 @@
     <MESSAGE value="Первичное восстановление" />
     <MESSAGE value="Заменил название промпта &quot;Заголовки к разделам&quot; на &quot;Методичка&quot;, прежний промпт переписал." />
     <MESSAGE value="Восстановил интерфейс сбора данных. Есть транскрибация" />
-    <option name="LAST_COMMIT_MESSAGE" value="Восстановил интерфейс сбора данных. Есть транскрибация" />
+    <MESSAGE value="Восстановил pdf парсинг" />
+    <MESSAGE value="Доработал prompt_monitor, дописал monitor_vectorization" />
+    <MESSAGE value="Поменял векторизацию на универсальную с использованием метаданных и определением модели" />
+    <option name="LAST_COMMIT_MESSAGE" value="Поменял векторизацию на универсальную с использованием метаданных и определением модели" />
   </component>
 </project>
