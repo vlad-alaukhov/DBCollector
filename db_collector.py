@@ -716,6 +716,7 @@ class DBCollector:
         self.progress.pack(fill=tk.X, padx=5, pady=5)
         self.progress.start()
 
+
         # Запускаем в отдельном потоке
         self.output_queue = Queue()
         self.output_queue = self.run_merge_process(folders, output_folder)
