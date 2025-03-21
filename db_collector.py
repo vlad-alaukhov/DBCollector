@@ -197,6 +197,19 @@ class DBCollector:
             self.file_save_button.config(state="disabled")
             self.file_saveas_button.config(state="disabled")
 
+    # Проверка директории на наличие файлов/папок
+    @staticmethod
+    def is_directory_empty(dir_path: str) -> bool:
+        try:
+            if not os.path.exists(dir_path):
+                raise FileNotFoundError(f"Путь {dir_path} не существует")
+            if not os.path.isdir(dir_path):
+                raise ValueError(f"{dir_path} не является директорией")
+            return next(os.scandir(dir_path), None) is None
+        except PermissionError:
+            print(f"Ошибка: Нет прав доступа к {dir_path}")
+            return False
+
     # Обновление текстового поля: имя файла становится Unnamed, текстовое поле очищается,
     # заполняется текстом из аргумента text, заголовок меняется и ставится признае несохраненного файла.
     def clear_text_field(self):
@@ -707,6 +720,10 @@ class DBCollector:
         if not output_folder:
             os.rmdir(initial_dir)
             return
+
+        if output_folder != initial_dir:
+            if self.is_directory_empty(initial_dir):
+                os.rename(initial_dir, output_folder)
 
         # Создаем прогресс-бар
         self.progress = ttk.Progressbar(
