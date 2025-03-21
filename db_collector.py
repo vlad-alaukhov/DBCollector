@@ -5,9 +5,7 @@ from functools import wraps
 from tkinter import filedialog, ttk
 from tkinter.messagebox import showwarning, showinfo, showerror
 import yaml
-import time
 
-from PIL.ImageOps import expand
 from rag_processor import DBConstructor
 import threading
 import queue
@@ -16,6 +14,7 @@ import subprocess
 
 class DBCollector:
     def __init__(self):
+        self.merge_status = None
         self.db_listbox = None
         self.selected_db_folders = None
         self.merge_db_window = None
@@ -575,8 +574,6 @@ class DBCollector:
     # Собственно векторизация
     @threaded
     def vectorise(self):
-        code = None
-        result = None
         model_type = self.model_type.get()
         model_index = self.model_type.current()
         model_name = self.model_name.get()
@@ -626,10 +623,10 @@ class DBCollector:
         btn_frame = ttk.Frame(self.merge_db_window)
         btn_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        add_btn = ttk.Button(btn_frame, text="Добавить базу", command=self.add_db_folder)
-        remove_btn = ttk.Button(btn_frame, text="Удалить", command=self.remove_db_folder)
+        add_btn = ttk.Button(btn_frame, text="+ Добавить", command=self.add_db_folder)
+        remove_btn = ttk.Button(btn_frame, text="- Удалить", command=self.remove_db_folder)
         merge_btn = ttk.Button(btn_frame, text="Объединить", command=self.start_merge)
-        cancel_btn = ttk.Button(btn_frame, text="Отмена", command=self.merge_db_window.destroy)
+        cancel_btn = ttk.Button(btn_frame, text="Отмена", command=self.merge_cancel)
 
         add_btn.pack(side=tk.LEFT, padx=2)
         remove_btn.pack(side=tk.LEFT, padx=2)
@@ -642,18 +639,26 @@ class DBCollector:
 
     def add_db_folder(self):
         """Добавление папки с базой в список"""
-        folder = filedialog.askdirectory(
+        if self.db_folder: initial_dir = "/".join(self.db_folder.split("/")[0:-1])
+        else: initial_dir = os.getcwd()
+        self.db_folder = filedialog.askdirectory(
+            parent=self.merge_db_window,
             title="Выберите папку с базой FAISS",
+            initialdir=initial_dir,
             mustexist=True
         )
-        if folder and self.validate_db_folder(folder):
-            if folder not in self.db_listbox.get(0, tk.END):
-                self.db_listbox.insert(tk.END, folder)
+        if not self.db_folder:
+            return
+        if self.db_folder and self.validate_db_folder(self.db_folder):
+            if self.db_folder not in self.db_listbox.get(0, tk.END):
+                self.db_listbox.insert(tk.END, self.db_folder)
+
                 self.update_merge_status()
             else:
-                showwarning("Предупреждение", "Эта база уже добавлена!")
-        elif folder:
-            showerror("Ошибка", "Выбранная папка не содержит валидную базу FAISS")
+                showwarning("Предупреждение", "Эта база уже добавлена!", parent=self.merge_db_window)
+        elif self.db_folder:
+            showerror("Ошибка", "Выбранная папка не содержит валидную базу FAISS", parent=self.merge_db_window)
+
 
     @staticmethod
     def validate_db_folder(path):
@@ -676,17 +681,31 @@ class DBCollector:
 
     def start_merge(self):
         """Запуск процесса объединения баз"""
+        self.db_maker = DBConstructor()
         folders = list(self.db_listbox.get(0, tk.END))
         if len(folders) < 2:
-            showwarning("Предупреждение", "Выберите минимум 2 базы для объединения")
+            showwarning("Предупреждение", "Выберите минимум 2 базы для объединения", parent=self.merge_db_window)
             return
+
+        result, main_meta = self.db_maker.metadata_loader(folders[-1])
+        print(self.db_folder)
+
+        if self.db_folder:
+            initial_dir = f"{'/'.join(self.db_folder.split('/')[0:-1])}/DB_Main_{main_meta['embedding_model'].split('/')[-1]}"
+        else: initial_dir = os.getcwd()
+        print(initial_dir)
+
+        if not os.path.exists(initial_dir): os.makedirs(initial_dir)
 
         # Выбор папки для сохранения
         output_folder = filedialog.askdirectory(
+            parent=self.merge_db_window,
             title="Выберите папку для сохранения объединенной базы",
+            initialdir=initial_dir,
             mustexist=False
         )
         if not output_folder:
+            os.rmdir(initial_dir)
             return
 
         # Создаем прогресс-бар
@@ -706,8 +725,7 @@ class DBCollector:
     def run_merge_process(self, folders, output_folder):
         """Запуск объединения в фоновом режиме"""
         try:
-            constructor = DBConstructor()
-            success, message = constructor.merge_databases(folders, output_folder)
+            success, message = self.db_maker.merge_databases(folders, output_folder)
             return success, message
         except Exception as e:
             return False, f"Ошибка объединения: {str(e)}"
@@ -720,12 +738,17 @@ class DBCollector:
             self.progress.pack_forget()
 
             if result[0]:
-                showinfo("Успешно", result[1])
+                showinfo("Успешно", result[1], parent=self.merge_db_window)
                 self.merge_db_window.destroy()
             else:
-                showerror("Ошибка", result[1])
+                showerror("Ошибка", result[1], parent=self.merge_db_window)
 
         except queue.Empty:
             self.root.after(100, self.monitor_merge_process)
+
+    def merge_cancel(self):
+        self.db_folder = None
+        print("Отменяю")
+        self.merge_db_window.destroy()
 
 DBCollector()

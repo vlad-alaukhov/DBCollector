@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Поменял векторизацию на универсальную с использованием метаданных и определением модели">
+    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Добавил код для объединения данных">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db_collector.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_collector.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,16 +44,16 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.db_collector.executor": "Run",
-    "Python.mf.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "/home/home/Projects/DBCollector"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.db_collector.executor&quot;: &quot;Run&quot;,
+    &quot;Python.mf.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/home/Projects/DBCollector&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -219,7 +220,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742068200927</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Добавил код для объединения данных">
+      <option name="closed" value="true" />
+      <created>1742148351884</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1742148351884</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -240,6 +249,7 @@
     <MESSAGE value="Восстановил pdf парсинг" />
     <MESSAGE value="Доработал prompt_monitor, дописал monitor_vectorization" />
     <MESSAGE value="Поменял векторизацию на универсальную с использованием метаданных и определением модели" />
-    <option name="LAST_COMMIT_MESSAGE" value="Поменял векторизацию на универсальную с использованием метаданных и определением модели" />
+    <MESSAGE value="Добавил код для объединения данных" />
+    <option name="LAST_COMMIT_MESSAGE" value="Добавил код для объединения данных" />
   </component>
 </project>
