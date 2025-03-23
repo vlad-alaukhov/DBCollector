@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Добавил код для объединения данных">
+    <list default="true" id="ed6b3905-2325-4d75-b7fb-5d23371c177a" name="Changes" comment="Улучшил работу с директориями в объединении баз">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db_collector.py" beforeDir="false" afterPath="$PROJECT_DIR$/db_collector.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +62,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-14705d77f0bb-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.25659.43" />
+        <option value="bundled-python-sdk-4f4e415b4190-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.26053.29" />
       </set>
     </attachedChunks>
   </component>
@@ -228,7 +227,31 @@
       <option name="project" value="LOCAL" />
       <updated>1742148351884</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Добавил код для объединения данных">
+      <option name="closed" value="true" />
+      <created>1742554147726</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1742554147726</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Поправил интерфейс объединения баз">
+      <option name="closed" value="true" />
+      <created>1742554193186</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1742554193186</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Улучшил работу с директориями в объединении баз">
+      <option name="closed" value="true" />
+      <created>1742557152185</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1742557152185</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -250,6 +273,8 @@
     <MESSAGE value="Доработал prompt_monitor, дописал monitor_vectorization" />
     <MESSAGE value="Поменял векторизацию на универсальную с использованием метаданных и определением модели" />
     <MESSAGE value="Добавил код для объединения данных" />
-    <option name="LAST_COMMIT_MESSAGE" value="Добавил код для объединения данных" />
+    <MESSAGE value="Поправил интерфейс объединения баз" />
+    <MESSAGE value="Улучшил работу с директориями в объединении баз" />
+    <option name="LAST_COMMIT_MESSAGE" value="Улучшил работу с директориями в объединении баз" />
   </component>
 </project>

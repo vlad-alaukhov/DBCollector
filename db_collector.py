@@ -483,6 +483,7 @@ class DBCollector:
 
         # Побил на чанки markdown разметкой
         self.markdown_chunks = self.db_maker.split_markdown(self.content)
+        print(f"Чанков при первичном разбиении: {len(self.markdown_chunks)}")
         # Готовлю к дроблению markdown чанков
         pc_lens = [len(md.page_content) for md in self.markdown_chunks] # Узнал длины всех чанков, чтобы взять максимум
         max_chunk = max(pc_lens)
@@ -592,7 +593,8 @@ class DBCollector:
         model_name = self.model_name.get()
         chunk_size = self.current_size.get()
         langchain_docs = self.db_maker.split_recursive_from_markdown(self.markdown_chunks, chunk_size)
-        print(model_index, model_name)
+
+        print(f"Чанков при вторичном разбиении: {len(langchain_docs)}")
 
         code, result = self.db_maker.vectorizator(langchain_docs, self.db_folder, model_type=model_type, model_name=model_name)
 
