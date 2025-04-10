@@ -5,8 +5,7 @@ from functools import wraps
 from tkinter import filedialog, ttk
 from tkinter.messagebox import showwarning, showinfo, showerror
 import yaml
-
-from rag_processor import DBConstructor
+from rag_processor import *
 import threading
 import queue
 from queue import Queue
@@ -43,13 +42,14 @@ class DBCollector:
         self.result_db = None
         self.prompts = {}
         self.selected_files = []
+        self.selected_file = None
         self.file_name = 'Unnamed.txt'
         self.chunk_size = 0
         self.markdown_chunks = []
 
         self.embs_models = {
             "openai": ["text-embedding-3-large", "text-embedding-ada-002"],
-            "huggingface": ["intfloat/multilingual-e5-base", "intfloat/multilingual-e5-large"]
+            "huggingface": ["intfloat/multilingual-e5-base", "intfloat/multilingual-e5-large", "sergeyzh/LaBSE-ru-turbo"]
         }
 
         self.transc_models = ["small", "medium", "base", "large_v3"]
@@ -331,8 +331,8 @@ class DBCollector:
         pdf_frame = ttk.Labelframe(self.collect_data_window, text=" PDF файлы ")
         pdf_frame.pack(fill="both", padx=5, pady=5)
 
-        ttk.Label(pdf_frame, text="PDF документ:", width=len("PDF документ:")).grid(row=0, column=0, padx=5, pady=5, sticky="nw")
-        self.pdf_btn = tk.Button(pdf_frame, text="Извлечь...", command=self.start_pdf)
+        ttk.Label(pdf_frame, text="Документ:", width=len("Документ:")).grid(row=0, column=0, padx=5, pady=5, sticky="nw")
+        self.pdf_btn = tk.Button(pdf_frame, text="Извлечь...", command=self.start_parsing)
         self.pdf_btn.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
 
 
@@ -452,25 +452,28 @@ class DBCollector:
             showerror("Ошибка", "Не удалось получить результат транскрибации")
 
     # PDF парсинг
-    def start_pdf(self):
+    def start_parsing(self):
         # Создаем прогресс-бар
         self.pdf_btn.config(state="disabled")
-        self.selected_files = list(filedialog.askopenfilenames(defaultextension="pdf", title="Открыть pdf"))
+        self.selected_file = filedialog.askopenfilename(title="Открыть файл",
+                                                         filetypes=[("Word document", ".docx"),
+                                                                    ("PDF document", ".pdf"),
+                                                                    ("Excel table", ".xlsx"),
+                                                                    ("All Files", ".*")])
         if self.selected_files:
-            self.run_pdf()
+            self.run_parsing()
             self.progress = ttk.Progressbar(self.collect_data_window, mode='indeterminate')
             self.progress.start()
             self.progress.pack(fill="x", pady=5, padx=5)
 
     @threaded
-    def run_pdf(self):
+    def run_parsing(self):
         db_maker = DBConstructor()
-        code, pdf_text = db_maker.pdf_parser(self.selected_files)
-        if code: self.change_text_field(pdf_text)
-        else: showerror("Ошибка", pdf_text)
-        self.monitor_pdf()
+        parsed_text = db_maker.document_parser(self.selected_file)
+        self.change_text_field(parsed_text)
+        self.monitor_parsing()
 
-    def monitor_pdf(self):
+    def monitor_parsing(self):
         self.progress.stop()
         self.progress.pack_forget()
         self.pdf_btn.config(state="normal")
